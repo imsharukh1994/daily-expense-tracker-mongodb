@@ -1,0 +1,683 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#2f6df6">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Daily Expense Tracker</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  --bg: #f3f6fc;
+  --card: #ffffff;
+  --ink: #1e293b;
+  --muted: #64748b;
+  --line: #e2e8f0;
+  --blue: #2563eb;
+  --blue-hover: #1d4ed8;
+  --blue2: #eff6ff;
+  --green: #10b981;
+  --red: #ef4444;
+  --input-bg: #f8fafc;
+  --input-border: #cbd5e1;
+  --box-bg: #f8fafc;
+  --btn-bg: #f1f5f9;
+  --modal-bg: #ffffff;
+  --del-bg: #fef2f2;
+  --hero-grad: linear-gradient(135deg, #2563eb, #3b82f6);
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #090c10;
+  --card: #141b25;
+  --ink: #f1f5f9;
+  --muted: #94a3b8;
+  --line: #1e293b;
+  --blue: #3b82f6;
+  --blue-hover: #60a5fa;
+  --blue2: rgba(59, 130, 246, 0.1);
+  --green: #22c55e;
+  --red: #f87171;
+  --input-bg: rgba(255, 255, 255, 0.03);
+  --input-border: #334155;
+  --box-bg: rgba(255, 255, 255, 0.02);
+  --btn-bg: #1e293b;
+  --modal-bg: #141b25;
+  --del-bg: rgba(239, 68, 68, 0.1);
+  --hero-grad: linear-gradient(135deg, #1d4ed8, #2563eb);
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Outfit', sans-serif;
+  transition: background 0.3s ease, color 0.3s ease;
+  line-height: 1.5;
+}
+
+button, input, select { font: inherit; }
+button { cursor: pointer; transition: all 0.2s ease; }
+button:active { transform: scale(0.98); }
+
+.app { max-width: 760px; margin: auto; padding: 24px 16px 48px; }
+
+.header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 24px; }
+.brand { display: flex; align-items: center; gap: 14px; min-width: 0; flex: 1; }
+.header-controls { display: flex; gap: 12px; align-items: center; flex-shrink: 0; }
+.logo {
+  width: 48px; height: 48px; min-width: 48px; flex-shrink: 0; border-radius: 16px; 
+  background: var(--hero-grad); 
+  display: grid; place-items: center; 
+  color: #fff; font-size: 24px; font-weight: 700;
+  box-shadow: 0 8px 16px rgba(37, 99, 235, 0.25);
+}
+.title { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; line-height: 1.2; }
+.sub { font-size: 13px; color: var(--muted); }
+.month {
+  width: 140px; height: 44px; border: 1px solid var(--input-border);
+  background: var(--input-bg); border-radius: 12px; padding: 0 12px;
+  font-weight: 600; color: var(--ink); cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.hero {
+  background: var(--hero-grad); color: #fff;
+  border-radius: 24px; padding: 24px;
+  box-shadow: 0 20px 40px rgba(37, 99, 235, 0.2);
+  position: relative; overflow: hidden;
+}
+.hero::after {
+  content: ''; position: absolute; top: -50%; right: -20%;
+  width: 300px; height: 300px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-row { display: flex; justify-content: space-between; align-items: flex-start; position: relative; z-index: 2; }
+.eyebrow { font-size: 13px; font-weight: 500; opacity: 0.85; text-transform: uppercase; letter-spacing: 0.5px; }
+.salary { font-size: 38px; font-weight: 800; margin-top: 4px; letter-spacing: -1px; }
+.edit {
+  border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1);
+  color: #fff; border-radius: 12px; padding: 8px 14px; font-size: 13px; font-weight: 600;
+  backdrop-filter: blur(8px);
+}
+.edit:hover { background: rgba(255,255,255,0.2); }
+
+.hero-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 24px; position: relative; z-index: 2; }
+.hs {
+  background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 16px; padding: 14px; backdrop-filter: blur(10px);
+}
+.hs small { font-size: 11px; font-weight: 500; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.5px; }
+.hs strong { display: block; font-size: 20px; font-weight: 700; margin-top: 4px; }
+
+.section { margin-top: 32px; }
+.section-head { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 12px; padding: 0 4px; }
+.section-head h2 { font-size: 20px; font-weight: 700; margin: 0; letter-spacing: -0.3px; }
+.section-head span { font-size: 13px; color: var(--muted); font-weight: 500; }
+
+.card {
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: 20px; padding: 20px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+}
+[data-theme="dark"] .card { box-shadow: 0 8px 30px rgba(0,0,0,0.2); }
+
+.daily-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.daily { background: var(--box-bg); border: 1px solid var(--line); border-radius: 16px; padding: 16px; }
+.daily small { display: block; color: var(--muted); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.daily strong { display: block; font-size: 22px; font-weight: 700; margin-top: 6px; }
+
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.field { min-width: 0; }
+.field label { display: block; font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 8px; }
+.field input, .field select {
+  width: 100%; height: 50px; border: 1px solid var(--input-border);
+  border-radius: 12px; background: var(--input-bg); padding: 0 16px;
+  color: var(--ink); outline: none; font-weight: 500; transition: all 0.2s;
+}
+.field input:focus, .field select:focus {
+  border-color: var(--blue); box-shadow: 0 0 0 4px var(--blue2); background: var(--card);
+}
+.full { grid-column: 1 / -1; }
+.add {
+  width: 100%; height: 52px; border: 0; border-radius: 12px;
+  background: var(--blue); color: #fff; font-weight: 700; font-size: 16px;
+  margin-top: 16px; box-shadow: 0 4px 12px rgba(37,99,235,0.2);
+}
+.add:hover { background: var(--blue-hover); transform: translateY(-1px); box-shadow: 0 6px 16px rgba(37,99,235,0.3); }
+.hint { font-size: 12px; color: var(--muted); line-height: 1.5; margin-top: 12px; text-align: center; }
+
+.summary-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 14px 4px; border-bottom: 1px dashed var(--line); font-size: 15px;
+}
+.summary-row:last-child { border-bottom: 0; }
+.summary-row span { font-weight: 600; color: var(--muted); }
+.summary-row strong { font-weight: 700; }
+
+.entries { padding: 0; }
+.entry {
+  display: grid; grid-template-columns: 48px 1fr auto; gap: 14px;
+  align-items: center; padding: 16px; border-bottom: 1px solid var(--line);
+  transition: background 0.2s;
+}
+.entry:last-child { border-bottom: 0; }
+.entry:hover { background: var(--box-bg); }
+.icon {
+  width: 48px; height: 48px; border-radius: 14px; background: var(--blue2);
+  display: grid; place-items: center; font-size: 22px;
+}
+.main strong { font-size: 15px; font-weight: 600; }
+.main small { display: block; color: var(--muted); font-size: 12px; margin-top: 4px; }
+.amount { text-align: right; }
+.amount strong { font-size: 16px; font-weight: 700; }
+.delete {
+  border: 0; background: var(--del-bg); color: var(--red); font-size: 12px;
+  padding: 6px 10px; border-radius: 8px; font-weight: 600; margin-top: 8px;
+}
+.delete:hover { background: var(--red); color: #fff; }
+
+.empty { text-align: center; padding: 40px 20px; }
+.empty .big { font-size: 40px; margin-bottom: 12px; opacity: 0.8; }
+.empty strong { display: block; font-size: 18px; font-weight: 600; }
+.empty p { font-size: 14px; color: var(--muted); margin: 8px 0 0; }
+
+.modal {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+  display: none; align-items: center; justify-content: center; padding: 16px; z-index: 50;
+}
+.modal.show { display: flex; animation: fadeIn 0.2s ease-out; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.modal-box {
+  width: 100%; max-width: 440px; background: var(--card);
+  border-radius: 24px; padding: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+  transform: translateY(0); animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.modal-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.modal-top h3 { margin: 0; font-size: 20px; font-weight: 700; }
+.close {
+  border: 0; background: var(--btn-bg); color: var(--ink); border-radius: 12px;
+  width: 36px; height: 36px; font-size: 18px; display: grid; place-items: center;
+}
+.close:hover { background: var(--line); }
+.modal-actions { display: flex; gap: 12px; margin-top: 24px; }
+.modal-actions button { flex: 1; height: 48px; border-radius: 12px; border: 0; font-weight: 700; font-size: 15px; }
+.save { background: var(--blue); color: #fff; }
+.save:hover { background: var(--blue-hover); }
+.cancel { background: var(--btn-bg); color: var(--ink); }
+.cancel:hover { background: var(--line); }
+.profile-pic { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
+
+@media(max-width: 600px) {
+  .app { padding: 16px 12px 40px; }
+  .header { gap: 8px; margin-bottom: 20px; }
+  .brand { gap: 10px; }
+  .logo { width: 40px; height: 40px; min-width: 40px; font-size: 20px; border-radius: 12px; }
+  .title { font-size: 16px; line-height: 1.1; }
+  .sub { font-size: 11px; }
+  .month { width: 120px; height: 40px; font-size: 14px; padding: 0 8px; }
+  .header-controls { gap: 8px; }
+  .hero { padding: 20px; }
+  .salary { font-size: 32px; }
+  .hero-stats { gap: 8px; }
+  .hs { padding: 12px 10px; }
+  .hs strong { font-size: 16px; }
+  .daily-grid { grid-template-columns: 1fr 1fr; }
+  .daily:last-child { grid-column: 1 / -1; }
+  .form-grid { grid-template-columns: 1fr; }
+  .full { grid-column: auto; }
+  .field input, .field select { font-size: 16px; } 
+  .modal { align-items: flex-end; padding: 12px; }
+  .modal-box { padding: 20px; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; }
+}
+</style>
+</head>
+<body>
+<main class="app">
+<div id="appView">
+<header class="header">
+ <div class="brand"><div class="logo">₹</div><div><div class="title">Daily Expense Tracker</div><div class="sub">Track where your salary goes.</div></div></div>
+ <div class="header-controls">
+  <button id="themeToggle" style="background:none;border:none;font-size:22px;padding:0;line-height:1" title="Toggle Dark Mode">🌙</button>
+  <input id="month" class="month" type="month" aria-label="Select month">
+ </div>
+</header>
+
+<section class="hero">
+ <div class="hero-row">
+  <div><div class="eyebrow">Monthly salary</div><div class="salary" id="salary">₹31,000</div></div>
+  <div style="text-align: right"><div class="eyebrow">CIBIL Score</div><div class="salary" id="cibilScoreDisplay">685</div></div>
+ </div>
+ <div style="display:flex; justify-content:space-between; margin-top:12px;">
+  <button class="edit" type="button" onclick="openSalary()">Edit salary</button>
+  <button class="edit" type="button" onclick="openCibil()">Edit CIBIL</button>
+ </div>
+ <div class="hero-stats">
+  <div class="hs"><small>Today's expense</small><strong id="todayTotal">₹0</strong></div>
+  <div class="hs"><small>This month</small><strong id="monthTotal">₹0</strong></div>
+  <div class="hs"><small>Salary left</small><strong id="salaryLeft">₹31,000</strong></div>
+ </div>
+</section>
+
+<section class="section">
+ <div class="section-head"><h2>Today</h2><span id="todayDate"></span></div>
+ <div class="card"><div class="daily-grid">
+  <div class="daily"><small>Travel</small><strong id="todayTravel">₹0</strong></div>
+  <div class="daily"><small>Food</small><strong id="todayFood">₹0</strong></div>
+  <div class="daily"><small>All other</small><strong id="todayOther">₹0</strong></div>
+ </div></div>
+</section>
+
+<section class="section">
+ <div class="section-head"><h2>Add expense</h2><span>Actual amount only</span></div>
+ <div class="card">
+  <div class="form-grid">
+   <div class="field"><label>Date</label><input id="date" type="date"></div>
+   <div class="field"><label>Amount (₹)</label><input id="amount" type="number" min="0" step="1" inputmode="numeric" placeholder="e.g. 190"></div>
+   <div class="field"><label>Category</label>
+    <select id="category"><option value="">Select category</option><option>Travel</option><option>Food</option><option>Rent</option><option>Bills</option><option>Loan</option><option>Shopping</option><option>Family</option><option>Other</option></select>
+   </div>
+   <div class="field" id="shiftWrap" style="display:none"><label>Shift (Travel only)</label>
+    <select id="shift"><option value="">Select shift</option><option>A Shift — 8 AM–6 PM</option><option>B Shift — 9:30 AM–7 PM</option><option>C Shift — 12 PM–10 PM</option><option>D Shift — 10 PM–8 AM</option></select>
+   </div>
+   <div class="field full"><label>Note (optional)</label><input id="note" type="text" maxlength="80" placeholder="e.g. Train + auto"></div>
+  </div>
+  <button class="add" id="addExpenseBtn" type="button">＋ Add expense</button><div id="savedMessage" style="display:none;text-align:center;color:#16834b;font-size:12px;font-weight:750;margin-top:9px">✓ Expense added</div>
+  <div class="hint">Nothing is automatic. Enter the exact amount you actually spent.</div>
+ </div>
+</section>
+
+<section class="section">
+ <div class="section-head"><h2>Monthly breakdown</h2><span id="count">0 entries</span></div>
+ <div class="card" id="breakdown"><div class="empty" style="padding:16px"><strong>No expenses yet</strong><p>Your categories will appear here.</p></div></div>
+</section>
+
+<section class="section">
+ <div class="section-head"><h2>Open Loans & Liabilities</h2><span id="loansCount">0 loans</span></div>
+ <div class="card entries" id="loans"></div>
+ <button class="add" type="button" onclick="openAddLoanModal()" style="margin-top:12px">＋ Add Loan</button>
+</section>
+
+<section class="section">
+ <div class="section-head"><h2>Pending Applications</h2><span id="appsCount">0 applications</span></div>
+ <div class="card entries" id="apps"></div>
+ <button class="add" type="button" onclick="openAddAppModal()" style="margin-top:12px">＋ Add Application</button>
+</section>
+
+<section class="section">
+ <div class="section-head"><h2>CIBIL Improvement Plan</h2><span>Short & Effective</span></div>
+ <div class="card" style="padding:0">
+  <div class="entries">
+    <div class="entry"><div class="icon" style="background:#2f6df6;color:#fff">🚫</div><div class="main"><strong>1. Stop New Applications</strong><small>No new loans/cards. Reduces hard enquiries.</small></div></div>
+    <div class="entry"><div class="icon" style="background:#16834b;color:#fff">🔍</div><div class="main"><strong>2. Dispute Unknown Loans</strong><small>Dispute: SAYYAMIN, MAS FINANCE, RINGKISSHTSICREV, SMICC</small></div></div>
+    <div class="entry"><div class="icon" style="background:#f59e0b;color:#fff">💰</div><div class="main"><strong>3. Pay Genuine Overdue</strong><small>Pay in full and get NOC/Closure letter.</small></div></div>
+    <div class="entry"><div class="icon" style="background:#8b5cf6;color:#fff">💳</div><div class="main"><strong>4. Reduce Card Balances</strong><small>Keep credit utilization below 30%.</small></div></div>
+    <div class="entry"><div class="icon" style="background:#0ea5e9;color:#fff">🏠</div><div class="main"><strong>5. Never Miss Home Loan EMI</strong><small>Your home loan is your strongest positive factor.</small></div></div>
+    <div class="entry"><div class="icon" style="background:#ec4899;color:#fff">⏳</div><div class="main"><strong>6. Maintain Long History</strong><small>Don't close old good accounts.</small></div></div>
+    <div class="entry"><div class="icon" style="background:#3b82f6;color:#fff">⏱️</div><div class="main"><strong>7. Check CIBIL Regularly</strong><small>Check every 30-45 days to track improvements.</small></div></div>
+  </div>
+ </div>
+</section>
+
+<section class="section">
+ <div class="section-head"><h2>Expense history</h2><span>Newest first</span></div>
+ <div class="card entries" id="entries"></div>
+</section>
+</div>
+</main>
+
+<div class="modal" id="salaryModal"><div class="modal-box">
+ <div class="modal-top"><h3>Monthly salary</h3><button class="close" type="button" onclick="closeSalary()">×</button></div>
+ <div class="field" style="margin-top:13px"><label>Salary (₹)</label><input id="salaryInput" type="number" min="0" step="1"></div>
+ <div class="modal-actions"><button class="cancel" type="button" onclick="closeSalary()">Cancel</button><button class="save" type="button" onclick="saveSalary()">Save</button></div>
+</div></div>
+
+<div class="modal" id="cibilModal"><div class="modal-box">
+ <div class="modal-top"><h3>CIBIL Score</h3><button class="close" type="button" onclick="closeCibil()">×</button></div>
+ <div class="field" style="margin-top:13px"><label>Score (300-900)</label><input id="cibilInput" type="number" min="300" max="900" step="1"></div>
+ <div class="modal-actions"><button class="cancel" type="button" onclick="closeCibil()">Cancel</button><button class="save" type="button" onclick="saveCibil()">Save</button></div>
+</div></div>
+
+<div class="modal" id="loanModal"><div class="modal-box">
+ <div class="modal-top"><h3>Add Open Loan</h3><button class="close" type="button" onclick="closeAddLoanModal()">×</button></div>
+ <div class="field" style="margin-top:13px"><label>Lender Name</label><input id="loanLender" type="text" placeholder="e.g. HDFC Bank"></div>
+ <div class="field" style="margin-top:13px"><label>Loan Type</label>
+    <select id="loanType"><option value="">Select type</option><option>Personal Loan</option><option>Home Loan</option><option>Auto Loan</option><option>Gold Loan</option><option>Credit Card</option><option>Other</option></select>
+ </div>
+ <div class="field" style="margin-top:13px"><label>Sanctioned Amount (₹)</label><input id="loanSanctioned" type="number" min="0" step="1"></div>
+ <div class="field" style="margin-top:13px"><label>Current Balance (₹)</label><input id="loanBalance" type="number" min="0" step="1"></div>
+ <div class="modal-actions"><button class="cancel" type="button" onclick="closeAddLoanModal()">Cancel</button><button class="save" type="button" onclick="saveLoan()">Save</button></div>
+</div></div>
+
+<div class="modal" id="appModal"><div class="modal-box">
+ <div class="modal-top"><h3>Add Application</h3><button class="close" type="button" onclick="closeAddAppModal()">×</button></div>
+ <div class="field" style="margin-top:13px"><label>Provider / Bank</label><input id="appProvider" type="text" placeholder="e.g. SBI Card"></div>
+ <div class="field" style="margin-top:13px"><label>Application Type</label>
+    <select id="appType"><option value="">Select type</option><option>Credit Card</option><option>Personal Loan</option><option>Home Loan</option><option>Other</option></select>
+ </div>
+ <div class="modal-actions"><button class="cancel" type="button" onclick="closeAddAppModal()">Cancel</button><button class="save" type="button" onclick="saveApp()">Save</button></div>
+</div></div>
+
+<script>
+if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
+const themeToggle = document.getElementById('themeToggle');
+let isDark = localStorage.getItem('theme') === 'dark';
+if (isDark) document.documentElement.setAttribute('data-theme', 'dark');
+themeToggle.textContent = isDark ? '☀️' : '🌙';
+themeToggle.addEventListener('click', () => {
+  isDark = !isDark;
+  if(isDark) document.documentElement.setAttribute('data-theme', 'dark');
+  else document.documentElement.removeAttribute('data-theme');
+  localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  themeToggle.textContent = isDark ? '☀️' : '🌙';
+});
+
+let data={};
+let allEntries=[];
+let allLoans=[];
+let allApps=[];
+let globalSalary=31000;
+let globalCibil=685;
+const now=new Date(), pad=n=>String(n).padStart(2,'0');
+const month=document.getElementById('month');
+month.value=`${now.getFullYear()}-${pad(now.getMonth()+1)}`;
+document.getElementById('date').value=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
+
+function monthKey(){return month.value}
+function md(){
+  if(!data[monthKey()]) data[monthKey()]={entries:[]};
+  return data[monthKey()];
+}
+function salary(){return globalSalary}
+function cibil(){return globalCibil}
+function money(n){return '₹'+Number(n||0).toLocaleString('en-IN',{maximumFractionDigits:0})}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
+
+function render(){
+ const entries=md().entries;
+ const monthTotal=entries.reduce((a,e)=>a+Number(e.amount),0);
+ const todayStr=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
+ const today=entries.filter(e=>e.date===todayStr);
+ const todayTotal=today.reduce((a,e)=>a+Number(e.amount),0);
+ const travel=today.filter(e=>e.category==='Travel').reduce((a,e)=>a+Number(e.amount),0);
+ const food=today.filter(e=>e.category==='Food').reduce((a,e)=>a+Number(e.amount),0);
+ const other=todayTotal-travel-food;
+
+ document.getElementById('salary').textContent=money(salary());
+ document.getElementById('cibilScoreDisplay').textContent=cibil();
+ document.getElementById('todayTotal').textContent=money(todayTotal);
+ document.getElementById('monthTotal').textContent=money(monthTotal);
+ document.getElementById('salaryLeft').textContent=money(salary()-monthTotal);
+ document.getElementById('salaryLeft').style.color=salary()-monthTotal<0?'#ffd7d7':'#fff';
+ document.getElementById('todayTravel').textContent=money(travel);
+ document.getElementById('todayFood').textContent=money(food);
+ document.getElementById('todayOther').textContent=money(other);
+ document.getElementById('todayDate').textContent=todayStr;
+ document.getElementById('count').textContent=entries.length+(entries.length===1?' entry':' entries');
+
+ const totals={};entries.forEach(e=>totals[e.category]=(totals[e.category]||0)+Number(e.amount));
+ const cats=Object.entries(totals).sort((a,b)=>b[1]-a[1]);
+ document.getElementById('breakdown').innerHTML=cats.length?cats.map(([c,v])=>`<div class="summary-row"><span>${esc(c)}</span><strong>${money(v)}</strong></div>`).join(''):'<div class="empty" style="padding:16px"><strong>No expenses yet</strong><p>Your categories will appear here.</p></div>';
+
+ const box=document.getElementById('entries');
+ if(!entries.length){box.innerHTML='<div class="empty"><div class="big">🧾</div><strong>No expenses recorded</strong><p>Add each expense as you spend it.</p></div>';return}
+ const icons={Travel:'🚆',Food:'🍱',Rent:'🏠',Bills:'💡',Loan:'💸',Shopping:'🛍️',Family:'👨‍👩‍👧',Other:'•'};
+ box.innerHTML=[...entries].sort((a,b)=>b.date.localeCompare(a.date)).map(e=>{
+   const i=entries.indexOf(e), extra=e.category==='Travel'&&e.shift?' · '+e.shift:'';
+   return `<div class="entry"><div class="icon">${icons[e.category]||'•'}</div><div class="main"><strong>${esc(e.category)}</strong><small>${esc(e.date)}${extra}${e.note?' · '+esc(e.note):''}</small></div><div class="amount"><strong>${money(e.amount)}</strong><br><button class="delete" type="button" onclick="removeExpense(${i})">🗑️ Delete</button></div></div>`;
+ }).join('');
+}
+async function addExpense(){
+  try {
+    const dateEl=document.getElementById('date');
+    const amountEl=document.getElementById('amount');
+    const categoryEl=document.getElementById('category');
+    const shiftEl=document.getElementById('shift');
+    const noteEl=document.getElementById('note');
+
+    const date=(dateEl.value||'').trim();
+    const amount=Number(amountEl.value);
+    const category=categoryEl.value;
+    const shift=shiftEl.value;
+    const note=(noteEl.value||'').trim();
+
+    if(!date){alert('Please select a date.');return}
+    if(!Number.isFinite(amount)||amount<=0){alert('Please enter the expense amount.');return}
+    if(!category){alert('Please select a category.');return}
+    if(date.substring(0,7)!==monthKey()){alert('Please select the same month as the expense date.');return}
+    if(category==='Travel'&&!shift){alert('Please select your shift for a Travel expense.');return}
+
+    const response=await fetch('/api/expenses',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({date,amount,category,shift:category==='Travel'?shift:'',note})
+    });
+    const result=await response.json();
+    if(!response.ok) throw new Error(result.error||'Could not save expense');
+
+    amountEl.value='';
+    categoryEl.value='';
+    shiftEl.value='';
+    noteEl.value='';
+    document.getElementById('shiftWrap').style.display='none';
+
+    await loadExpenses();
+
+    const msg=document.getElementById('savedMessage');
+    if(msg){
+      msg.textContent='✓ Expense saved to MongoDB';
+      msg.style.display='block';
+      setTimeout(()=>msg.style.display='none',1800);
+    }
+  } catch(err) {
+    alert(err.message||'Could not save the expense.');
+  }
+}
+
+async function loadExpenses(){
+  const response=await fetch('/api/expenses');
+  const result=await response.json();
+  if(!response.ok) throw new Error(result.error||'Could not load expenses');
+
+  allEntries=result.entries||[];
+  data={};
+  for(const e of allEntries){
+    if(!data[e.date.slice(0,7)]) data[e.date.slice(0,7)]={entries:[]};
+    data[e.date.slice(0,7)].entries.push(e);
+  }
+  if(!data[monthKey()]) data[monthKey()]={entries:[]};
+  render();
+}
+async function removeExpense(i){
+  const entry=md().entries[i];
+  if(!entry) return;
+  if(!confirm('Delete this expense?')) return;
+  const response=await fetch('/api/expenses/'+encodeURIComponent(entry._id),{method:'DELETE'});
+  const result=await response.json();
+  if(!response.ok){alert(result.error||'Could not delete expense');return}
+  await loadExpenses();
+}
+async function loadSettings() {
+  try {
+    const res = await fetch('/api/settings');
+    const data = await res.json();
+    globalSalary = data.salary || 31000;
+    globalCibil = data.cibil || 685;
+  } catch (err) {
+    console.error('Could not load settings', err);
+  }
+}
+
+function openSalary(){document.getElementById('salaryInput').value=salary();document.getElementById('salaryModal').classList.add('show')}
+function closeSalary(){document.getElementById('salaryModal').classList.remove('show')}
+async function saveSalary(){
+  globalSalary = Number(document.getElementById('salaryInput').value||0);
+  closeSalary();render();
+  fetch('/api/settings', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({salary: globalSalary, cibil: globalCibil})});
+}
+function openCibil(){document.getElementById('cibilInput').value=cibil();document.getElementById('cibilModal').classList.add('show')}
+function closeCibil(){document.getElementById('cibilModal').classList.remove('show')}
+async function saveCibil(){
+  globalCibil = Number(document.getElementById('cibilInput').value||685);
+  closeCibil();render();
+  fetch('/api/settings', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({salary: globalSalary, cibil: globalCibil})});
+}
+
+async function loadLoans(){
+  const response=await fetch('/api/loans');
+  const result=await response.json();
+  if(!response.ok) throw new Error(result.error||'Could not load loans');
+  allLoans=result.entries||[];
+  renderLoans();
+}
+
+function renderLoans(){
+  const box=document.getElementById('loans');
+  document.getElementById('loansCount').textContent=allLoans.length+(allLoans.length===1?' loan':' loans');
+  
+  if(!allLoans.length){
+    box.innerHTML='<div class="empty"><div class="big">🏦</div><strong>No open loans</strong><p>You have no active liabilities.</p></div>';
+    return;
+  }
+  
+  box.innerHTML=allLoans.map((l, i)=>{
+    return `<div class="entry"><div class="icon">🏦</div><div class="main"><strong>${esc(l.lender)}</strong><small>${esc(l.type)} · Sanctioned: ${money(l.sanctioned)}</small></div><div class="amount" style="color:var(--red)"><strong>${money(l.balance)}</strong><br><div style="display:flex;gap:4px;justify-content:flex-end;margin-top:6px;"><button class="delete" style="margin-top:0;background:var(--blue2);color:var(--blue);" type="button" onclick="editLoan(${i})">✏️ Edit</button><button class="delete" style="margin-top:0;" type="button" onclick="removeLoan(${i})">🗑️ Delete</button></div></div></div>`;
+  }).join('');
+}
+
+let editingLoanId = null;
+
+function openAddLoanModal(){
+  editingLoanId = null;
+  document.getElementById('loanLender').value='';
+  document.getElementById('loanType').value='';
+  document.getElementById('loanSanctioned').value='';
+  document.getElementById('loanBalance').value='';
+  document.getElementById('loanModal').classList.add('show');
+}
+
+function editLoan(i) {
+  const l = allLoans[i];
+  if (!l) return;
+  editingLoanId = l._id;
+  document.getElementById('loanLender').value=l.lender;
+  document.getElementById('loanType').value=l.type;
+  document.getElementById('loanSanctioned').value=l.sanctioned;
+  document.getElementById('loanBalance').value=l.balance;
+  document.getElementById('loanModal').classList.add('show');
+}
+
+function closeAddLoanModal(){document.getElementById('loanModal').classList.remove('show')}
+async function saveLoan(){
+  try {
+    const lender=(document.getElementById('loanLender').value||'').trim();
+    const type=document.getElementById('loanType').value;
+    const sanctionedVal=document.getElementById('loanSanctioned').value;
+    const balanceVal=document.getElementById('loanBalance').value;
+    if(!lender||!type||sanctionedVal===''||balanceVal===''){alert('Please fill all fields');return;}
+    const sanctioned=Number(sanctionedVal);
+    const balance=Number(balanceVal);
+    
+    let url = '/api/loans';
+    let method = 'POST';
+    if (editingLoanId) {
+      url = '/api/loans/' + encodeURIComponent(editingLoanId);
+      method = 'PUT';
+    }
+
+    const response=await fetch(url,{
+      method,
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({lender,type,sanctioned,balance})
+    });
+    if(!response.ok) throw new Error('Could not save loan');
+    
+    closeAddLoanModal();
+    await loadLoans();
+  } catch(err) {
+    alert(err.message||'Could not save loan.');
+  }
+}
+
+async function removeLoan(i){
+  const entry=allLoans[i];
+  if(!entry) return;
+  if(!confirm('Delete this loan?')) return;
+  const response=await fetch('/api/loans/'+encodeURIComponent(entry._id),{method:'DELETE'});
+  if(!response.ok){alert('Could not delete loan');return}
+  await loadLoans();
+}
+
+async function loadApps(){
+  const response=await fetch('/api/applications');
+  const result=await response.json();
+  if(!response.ok) throw new Error(result.error||'Could not load applications');
+  allApps=result.entries||[];
+  renderApps();
+}
+
+function renderApps(){
+  const box=document.getElementById('apps');
+  document.getElementById('appsCount').textContent=allApps.length+(allApps.length===1?' app':' apps');
+  
+  if(!allApps.length){
+    box.innerHTML='<div class="empty"><div class="big">⏳</div><strong>No pending applications</strong><p>It is best to keep this empty to improve CIBIL.</p></div>';
+    return;
+  }
+  
+  box.innerHTML=allApps.map((a, i)=>{
+    return `<div class="entry"><div class="icon" style="background:#fff7e6">⏳</div><div class="main"><strong>${esc(a.provider)}</strong><small>${esc(a.type)} · Status: ${esc(a.status)}</small></div><div class="amount"><button class="delete" type="button" onclick="removeApp(${i})">🗑️ Delete</button></div></div>`;
+  }).join('');
+}
+
+function openAddAppModal(){
+  document.getElementById('appProvider').value='';
+  document.getElementById('appType').value='';
+  document.getElementById('appModal').classList.add('show');
+}
+function closeAddAppModal(){document.getElementById('appModal').classList.remove('show')}
+async function saveApp(){
+  try {
+    const provider=(document.getElementById('appProvider').value||'').trim();
+    const type=document.getElementById('appType').value;
+    if(!provider||!type){alert('Please fill all fields');return;}
+    
+    const response=await fetch('/api/applications',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({provider,type})
+    });
+    if(!response.ok) throw new Error('Could not save application');
+    
+    closeAddAppModal();
+    await loadApps();
+  } catch(err) {
+    alert(err.message||'Could not save application.');
+  }
+}
+
+async function removeApp(i){
+  const entry=allApps[i];
+  if(!entry) return;
+  if(!confirm('Delete this application?')) return;
+  const response=await fetch('/api/applications/'+encodeURIComponent(entry._id),{method:'DELETE'});
+  if(!response.ok){alert('Could not delete application');return}
+  await loadApps();
+}
+
+document.getElementById('category').addEventListener('change',e=>document.getElementById('shiftWrap').style.display=e.target.value==='Travel'?'block':'none');
+document.getElementById('addExpenseBtn').addEventListener('click',addExpense);
+month.addEventListener('change',()=>{document.getElementById('date').value=month.value+'-01';render()});
+
+Promise.all([loadSettings(), loadExpenses(), loadLoans(), loadApps()]).then(render).catch(err=>console.error(err));
+</script>
+</body>
+</html>

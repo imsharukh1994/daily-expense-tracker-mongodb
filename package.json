@@ -1,0 +1,19 @@
+{
+  "name": "daily-expense-tracker-mongodb",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Personal daily expense tracker with MongoDB Atlas storage. No user login.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^16.4.7",
+    "express": "^5.1.0",
+    "google-auth-library": "^11.0.2",
+    "jsonwebtoken": "^9.0.3",
+    "mongodb": "^6.18.0"
+  }
+}
